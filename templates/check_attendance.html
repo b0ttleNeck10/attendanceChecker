@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block menu %}
+    <div class="w3-bar w3-blue">
+        <a href="/" class="w3-button w3-right">REGISTER</a>
+        <a href="/viewattendance" class="w3-button w3-right">VIEW ATTENDANCE</a>
+        <a href="/checkattendance" class="w3-button w3-right">CHECK ATTENDANCE</a>
+    </div>
+{% endblock %}
+{% block content %}
+    <div class="w3-twothird">
+        <div class="w3-card-4 w3-center w3-padding-24">
+            <h3 style="margin: 0;">Scan QR Code</h3>
+            <video id="webCamera" style="height: 50%; width: 50%;" class="w3-margin"></video>
+            <div id="reader" style="width: 100%;">
+            	<input id="result" type="text" name="idno" placeholder="scan qr code" style="text-align: center;">
+            </div>
+        </div>
+    </div>
+        <div class="w3-third">
+            <div class="w3-container w3-card-4 w3-margin-left w3-center" id="student-details">
+            </div>
+        </div>
+
+    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+    <script>
+        let scanner = new Instascan.Scanner({ video: document.getElementById('webCamera') });
+        Instascan.Camera.getCameras().then(function(cameras) {
+            if (cameras.length > 0) {
+                scanner.start(cameras[0]);
+            } else {
+                alert('No cameras found');
+            }        	
+        }).catch(function(e) {
+            console.error(e)
+        });
+
+        scanner.addListener('scan', function(c) {
+            document.getElementById('result').value = c;
+
+            // Send QR code data to backend
+            fetch('/checkattendance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ idno: c })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let student = data.student;
+                    document.getElementById('student-details').innerHTML = `
+                        <h3>Student Detail</h3>
+                        <img src="${student.image}" alt="Student Image" class="w3-image" style="width:150px;">
+                        <p><b>${student.firstname} ${student.lastname}</b></p>
+                    `;
+                } else {
+                    document.getElementById('student-details').innerHTML = `
+                        <p><b>Student not found!</b></p>
+                    `;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+{% endblock %}

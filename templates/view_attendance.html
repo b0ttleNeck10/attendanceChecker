@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block menu %}
+	<div class="w3-bar w3-blue">
+		<a href="/" class="w3-button w3-right">REGISTER</a>
+		<a href="/viewattendance" class="w3-button w3-right">VIEW ATTENDANCE</a>
+		<a href="/checkattendance" class="w3-button w3-right">CHECK ATTENDANCE</a>
+	</div>
+{% endblock %}
+{% block content %}
+	<div class="w3-row-padding">
+		<div class="">
+			<table class="w3-table-all">
+				<tr>
+					<th>IDNO</th>
+					<th>NAME</th>
+					<th>LOG TIME</th>
+				</tr>
+				{% for student in attendance %}
+				<tr>
+					<td>{{ student['idno'] }}</td>
+					<td>{{ student['firstname'] }} {{ student['lastname'] }}</td>
+					<td>{{ student['logtime'] }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+	</div>
+{% endblock %}
